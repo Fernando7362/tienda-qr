@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Evento</title>
+</head>
+<body>
+    <h1 id="evento-titulo"></h1>
+    <p id="evento-precio"></p>
+
+    <label for="cantidad">Cantidad de tickets:</label>
+    <input type="number" id="cantidad" min="1" value="1">
+
+    <button onclick="comprarEntrada()">Comprar</button>
+
+    <script>
+        // Obtener parámetros de la URL
+        const params = new URLSearchParams(window.location.search);
+        const evento = params.get("evento");
+        const precio = params.get("precio");
+
+        // Mostrar los datos en la página
+        document.getElementById("evento-titulo").innerText = evento;
+        document.getElementById("evento-precio").innerText = `Precio: $${precio}`;
+
+        function comprarEntrada() {
+    const comprador = prompt("Ingresa tu nombre para la compra:");
+    const cantidad = document.getElementById("cantidad").value;
+
+    if (!comprador) {
+        alert("Debes ingresar tu nombre para continuar.");
+        return;
+    }
+
+    fetch("http://localhost:5000/comprar-entrada", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ comprador, evento, precio, cantidad })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.mensaje) {
+            alert("✅ Compra realizada con éxito.\nNúmero de orden: " + data.numeroOrden);
+            window.location.href = "historial.html"; // Redirigir al historial de compras
+        } else {
+            alert("❌ Hubo un problema con la compra.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("❌ Hubo un problema con la compra.");
+    });
+}
+
+            if (!comprador) {
+                alert("Debes ingresar tu nombre para continuar.");
+                return;
+            }
+
+            fetch("http://localhost:5000/comprar-entrada", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ comprador, evento, precio, cantidad })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Compra realizada con éxito. QR generado en el servidor.");
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Hubo un problema con la compra.");
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compra de Entradas</title>
+</head>
+<body>
+    <h1>Eventos Disponibles</h1>
+
+    <div>
+        <h2>Concierto Rock</h2>
+        <img src="uploads/concierto.jpg" alt="Concierto Rock" 
+             style="width: 200px; cursor: pointer;"
+             onclick="verDetalles('Concierto Rock', 50)">
+    </div>
+
+    <div>
+        <h2>Obra de Teatro</h2>
+        <img src="uploads/teatro.jpg" alt="Obra de Teatro" 
+             style="width: 200px; cursor: pointer;"
+             onclick="verDetalles('Obra de Teatro', 30)">
+    </div>
+
+    <script>
+        function verDetalles(evento, precio) {
+            window.location.href = `detalle.html?evento=${encodeURIComponent(evento)}&precio=${precio}`;
+        }
+    </script>
+</body>
+</html>

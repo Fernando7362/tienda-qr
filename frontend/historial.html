@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Compras</title>
+</head>
+<body>
+    <h1>Historial de Compras</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Número de Orden</th>
+                <th>Comprador</th>
+                <th>Evento</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>QR</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="historial-body"></tbody>
+    </table>
+
+    <script>
+        fetch("http://localhost:5000/historial")
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById("historial-body");
+                data.forEach(compra => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${compra.numeroOrden}</td>
+                        <td>${compra.comprador}</td>
+                        <td>${compra.evento}</td>
+                        <td>$${compra.precio}</td>
+                        <td>${compra.cantidad}</td>
+                        <td><img src="${compra.qrPath}" width="100"></td>
+                        <td><button onclick="cancelarCompra(${compra.numeroOrden})">Cancelar</button></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => console.error("Error:", error));
+
+        function cancelarCompra(numeroOrden) {
+            if (confirm("¿Estás seguro de cancelar esta compra?")) {
+                fetch(`http://localhost:5000/cancelar-compra/${numeroOrden}`, {
+                    method: "DELETE"
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.mensaje);
+                    location.reload();
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        }
+    </script>
+</body>
+</html>
