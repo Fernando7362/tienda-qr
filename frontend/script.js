@@ -9,9 +9,10 @@ function comprarEntrada(evento, precio, boton) {
     boton.innerText = "Procesando...";
 
     const comprador = prompt("Ingresa tu nombre para la compra:");
+    const cantidad = document.getElementById("cantidad") ? document.getElementById("cantidad").value : 1;
 
-    if (!comprador) {
-        alert("Debes ingresar tu nombre para continuar.");
+    if (!comprador || cantidad <= 0) {
+        alert("Debes ingresar tu nombre y una cantidad válida.");
         boton.style.backgroundColor = "blue";
         boton.innerText = "Comprar";
         return;
@@ -22,20 +23,24 @@ function comprarEntrada(evento, precio, boton) {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ comprador, evento, precio })
+        body: JSON.stringify({ comprador, evento, precio, cantidad })
     })
     .then(response => response.json())
     .then(data => {
-        alert("Compra realizada con éxito. QR generado en el servidor.");
-        boton.style.backgroundColor = "gray"; 
-        boton.innerText = "Comprado"; 
-        
-        // Abrir nueva ventana con la información del evento
-        window.open(`detalle.html?evento=${encodeURIComponent(evento)}&precio=${precio}&comprador=${encodeURIComponent(comprador)}`, "_blank");
+        if (data.mensaje) {
+            alert(`✅ Compra realizada con éxito.\nNúmero de orden: ${data.numeroOrden}`);
+            boton.style.backgroundColor = "gray"; 
+            boton.innerText = "Comprado"; 
+            
+            // ❌ Eliminar la redirección automática al historial si no quieres mostrarlo al comprador
+            // window.location.href = "historial.html";  
+        } else {
+            alert("❌ Hubo un problema con la compra.");
+        }
     })
     .catch(error => {
         console.error("Error:", error);
-        alert("Hubo un problema con la compra.");
+        alert("❌ Hubo un problema con la compra.");
         boton.style.backgroundColor = "red";
         boton.innerText = "Error";
     });

@@ -13,7 +13,6 @@ dotenv.config(); // Cargar variables de entorno
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -98,6 +97,47 @@ app.post("/comprar-entrada", async (req, res) => {
   } catch (error) {
     console.error("❌ Error en compra:", error);
     res.status(500).json({ error: "Error al procesar la compra" });
+  }
+});
+
+// 📌 Ruta protegida para ver el historial de compras (solo el proveedor)
+app.get("/historial", async (req, res) => {
+  const claveSecreta = req.query.clave; // Obtener clave de la URL
+
+  if (!claveSecreta || claveSecreta !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ error: "Acceso denegado" });
+  }
+
+  try {
+      const compras = await Compra.find().sort({ numeroOrden: -1 }); // Orden descendente
+      res.json(compras);
+  } catch (error) {
+      console.error("❌ Error al obtener historial:", error);
+      res.status(500).json({ error: "Error al obtener historial de compras" });
+  }
+});
+
+// 📌 Ruta para cancelar una compra
+app.delete("/cancelar-compra/:numeroOrden", async (req, res) => {
+  try {
+      const { numeroOrden } = req.params;
+      const compra = await Compra.findOneAndDelete({ numeroOrden });
+
+      if (!compra) {
+          return res.status(404).json({ error: "Compra no encontrada" });
+      }
+
+      // 📌 Eliminar el archivo QR asociado
+      const qrFilePath = path.join(__dirname, compra.qrPath);
+      if (fs.existsSync(qrFilePath)) {
+          fs.unlinkSync(qrFilePath);
+      }
+
+      console.log(`❌ Compra cancelada: ${numeroOrden}`);
+      res.json({ mensaje: "Compra cancelada con éxito" });
+  } catch (error) {
+      console.error("❌ Error al cancelar compra:", error);
+      res.status(500).json({ error: "Error al cancelar la compra" });
   }
 });
 

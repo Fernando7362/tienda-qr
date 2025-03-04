@@ -12,7 +12,7 @@
     <label for="cantidad">Cantidad de tickets:</label>
     <input type="number" id="cantidad" min="1" value="1">
 
-    <button onclick="comprarEntrada()">Comprar</button>
+    <button id="btn-comprar">Comprar</button>
 
     <script>
         // Obtener parámetros de la URL
@@ -24,41 +24,20 @@
         document.getElementById("evento-titulo").innerText = evento;
         document.getElementById("evento-precio").innerText = `Precio: $${precio}`;
 
+        // Función para comprar la entrada
         function comprarEntrada() {
-    const comprador = prompt("Ingresa tu nombre para la compra:");
-    const cantidad = document.getElementById("cantidad").value;
+            const comprador = prompt("Ingresa tu nombre para la compra:");
+            const cantidad = document.getElementById("cantidad").value;
+            const boton = document.getElementById("btn-comprar");
 
-    if (!comprador) {
-        alert("Debes ingresar tu nombre para continuar.");
-        return;
-    }
-
-    fetch("http://localhost:5000/comprar-entrada", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ comprador, evento, precio, cantidad })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.mensaje) {
-            alert("✅ Compra realizada con éxito.\nNúmero de orden: " + data.numeroOrden);
-            window.location.href = "historial.html"; // Redirigir al historial de compras
-        } else {
-            alert("❌ Hubo un problema con la compra.");
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("❌ Hubo un problema con la compra.");
-    });
-}
-
-            if (!comprador) {
-                alert("Debes ingresar tu nombre para continuar.");
+            if (!comprador || cantidad <= 0) {
+                alert("Debes ingresar tu nombre y una cantidad válida.");
                 return;
             }
+
+            // Cambiar color del botón para indicar compra en proceso
+            boton.style.backgroundColor = "green";
+            boton.innerText = "Procesando...";
 
             fetch("http://localhost:5000/comprar-entrada", {
                 method: "POST",
@@ -69,12 +48,27 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert("Compra realizada con éxito. QR generado en el servidor.");
+                if (data.mensaje) {
+                    alert(`✅ Compra realizada con éxito.\nNúmero de orden: ${data.numeroOrden}`);
+                    boton.style.backgroundColor = "gray"; 
+                    boton.innerText = "Comprado"; 
+                    // 🔹 Eliminé la redirección al historial de compras
+                } else {
+                    alert("❌ Hubo un problema con la compra.");
+                    boton.style.backgroundColor = "red";
+                    boton.innerText = "Error";
+                }
             })
             .catch(error => {
                 console.error("Error:", error);
-                alert("Hubo un problema con la compra.");
+                alert("❌ Hubo un problema con la compra.");
+                boton.style.backgroundColor = "red";
+                boton.innerText = "Error";
             });
+        }
+
+        // Asignar función al botón de compra
+        document.getElementById("btn-comprar").addEventListener("click", comprarEntrada);
     </script>
 </body>
 </html>
